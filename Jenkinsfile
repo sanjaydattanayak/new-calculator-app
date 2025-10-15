@@ -10,7 +10,7 @@ pipeline {
         stage('CI: Test') {
             steps {
                 echo 'Running unit tests...'
-                bat '"C:\\Users\\Admin\\AppData\\Local\\Programs\\Python\\Python314\\python.exe" -m unittest test.py'
+                bat '"C:\\Users\\Admin\\AppData\\Local\\Programs\\Python\\Python314\\python.exe" -m unittest discover -s tests'
             }
         }
 
@@ -23,17 +23,20 @@ pipeline {
 
         stage('CD: Deploy') {
             steps {
-                echo 'Deploy to AWS Lambda (if configured)'
+                echo 'Deploying Docker container...'
+                bat 'docker stop calculator-container || exit 0'
+                bat 'docker rm calculator-container || exit 0'
+                bat 'docker run -d --name calculator-container -p 5000:5000 calculator-app'
             }
         }
     }
 
     post {
         success {
-            echo '✅ Build successful!'
+            echo '✅ Build and Deployment successful!'
         }
         failure {
-            echo '❌ Build failed!'
+            echo '❌ Build or Deployment failed!'
         }
     }
 }
