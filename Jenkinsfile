@@ -10,7 +10,8 @@ pipeline {
         stage('CI: Test') {
             steps {
                 echo 'Running unit tests...'
-                bat '"C:\\Users\\Admin\\AppData\\Local\\Programs\\Python\\Python314\\python.exe" -m unittest discover -s tests'
+                // Ensure we are in the workspace root and discover all Python test files
+                bat 'cd %WORKSPACE% && "C:\\Users\\Admin\\AppData\\Local\\Programs\\Python\\Python314\\python.exe" -m unittest discover -s tests -p "*.py"'
             }
         }
 
@@ -24,8 +25,10 @@ pipeline {
         stage('CD: Deploy') {
             steps {
                 echo 'Deploying Docker container...'
+                // Stop and remove existing container if it exists
                 bat 'docker stop calculator-container || exit 0'
                 bat 'docker rm calculator-container || exit 0'
+                // Run new container
                 bat 'docker run -d --name calculator-container -p 5000:5000 calculator-app'
             }
         }
